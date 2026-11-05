@@ -3,8 +3,8 @@
 Auto-syncs workouts from **Samsung Health → Health Connect → Devs Who Move** (`POST /api/activities`).
 
 ## Setup
-1. Open this folder in Android Studio and let Gradle sync. If it suggests newer AGP, Kotlin or library versions, accept them.
-2. Run it on your phone.
+1. Get the APK: open **Actions → Build APK → latest run**, download the `dwm-sync-debug-*` artifact and unzip it. Or open this folder in Android Studio and run it.
+2. Install it on your phone. You'll need to allow installs from your browser or file manager.
 3. Tap **Grant access** and allow Exercise, Distance, background access and past-data access.
 4. On devswhorun.dev, go to **Your agents** and create a token with `activities:write`. Paste it into the app.
 5. Tap **Save & turn on auto-sync**.
