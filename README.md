@@ -1,18 +1,29 @@
-<img src="docs/logo.png" width="96" alt="DWM Sync logo">
+<img src="docs/banner.png" alt="DWM Sync: workouts from Health Connect apps, synced to Devs Who Move" width="100%">
 
 # DWM Sync
 
-Auto-syncs workouts from **Samsung Health → Health Connect → Devs Who Move** (`POST /api/activities`).
+An Android app that uploads the workouts your fitness apps record (Samsung Health, Google Fit, Health Sync and any other app that writes to Health Connect) to your [Devs Who Move](https://devswhorun.dev) account, automatically and in the background.
+
+**[Download the latest APK](https://github.com/yogeshpaliyal/dwm-sync/releases/download/latest/dwm-sync.apk)** · [Release notes](https://github.com/yogeshpaliyal/dwm-sync/releases/tag/latest)
+
+> [!NOTE]
+> This is an **unofficial**, community-built app. It isn't made, endorsed or supported by Devs Who Move. It uses the site's public agent API with a token you create yourself. For the official site, go to **[devswhorun.dev](https://devswhorun.dev)**.
+
+## Screenshots
+
+| Home | Settings | Import older workouts |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/home.png" width="250" alt="Home: last 7 days and the workout log"> | <img src="docs/screenshots/settings.png" width="250" alt="Settings: account, syncing and workout apps"> | <img src="docs/screenshots/import.png" width="250" alt="Import older workouts by date range"> |
 
 ## Install
-1. Download `dwm-sync.apk` from **[Latest release](https://github.com/yogeshpaliyal/dwm-sync/releases/tag/latest)**. Every push to `main` rebuilds it as a release build shrunk with R8. You can also open this folder in Android Studio and run it from there.
+1. Download **[dwm-sync.apk](https://github.com/yogeshpaliyal/dwm-sync/releases/download/latest/dwm-sync.apk)** from the [Latest release](https://github.com/yogeshpaliyal/dwm-sync/releases/tag/latest). Every push to `main` rebuilds it as a release build shrunk with R8. You can also open this folder in Android Studio and run it from there.
 2. Install the APK on your phone. You'll need to allow installs from your browser or file manager. New builds install over the old one, because every build is signed with the same `debug.keystore` from this repo.
 
 ## First-run setup (shown once)
 1. **Welcome**: explains what the app does.
 2. **Health Connect**: grant access to Exercise and Distance, plus background and past-data access if offered.
 3. **Sources**: the app lists every app that has written workouts to Health Connect in the last 90 days, with its icon, workout count and devices. Tick the ones to sync and use the arrows to set priority. Samsung Health is ticked by default.
-4. **Account**: enter the site URL and an agent token (`activities:write`, created under **Your agents** on the site).
+4. **Account**: enter the site URL and an agent token (`activities:write`, created under **Your agents** on [devswhorun.dev](https://devswhorun.dev)).
 5. **Older workouts**: choose *Only new from now on*, the last 7, 30 or 90 days, the last 12 months, or **Pick dates…** for a custom range.
 
 When you tap Finish, auto-sync is scheduled and the import you chose starts.
