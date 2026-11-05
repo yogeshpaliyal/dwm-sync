@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,12 +43,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.yogeshpaliyal.dwmsync.R
 import com.yogeshpaliyal.dwmsync.SAMSUNG_HEALTH_PACKAGE
 import com.yogeshpaliyal.dwmsync.Settings
 import com.yogeshpaliyal.dwmsync.Sync
@@ -115,6 +119,7 @@ fun OnboardingScreen(onDone: () -> Unit) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                 when (s) {
                     0 -> {
+                        AppLogo(Modifier.padding(start = 24.dp, top = 32.dp))
                         Heading(
                             "Your workouts, on Devs Who Move",
                             "DWM Sync picks up the workouts your fitness apps already record and uploads them for you. " +
@@ -284,6 +289,23 @@ private fun PathStop(icon: @Composable () -> Unit, title: String, body: String, 
             Text(title, style = MaterialTheme.typography.titleMedium)
             Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+    }
+}
+
+/** The launcher mark, drawn from the same vector as the app icon. */
+@Composable
+private fun AppLogo(modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .size(64.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color(0xFF234D3C)),
+    ) {
+        Image(
+            painter = painterResource(R.drawable.ic_launcher_foreground),
+            contentDescription = "DWM Sync",
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 

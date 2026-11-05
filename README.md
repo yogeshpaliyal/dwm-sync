@@ -1,3 +1,5 @@
+<img src="docs/logo.png" width="96" alt="DWM Sync logo">
+
 # DWM Sync
 
 Auto-syncs workouts from **Samsung Health → Health Connect → Devs Who Move** (`POST /api/activities`).
