@@ -27,7 +27,18 @@ class Settings(context: Context) {
 
     var token: String
         get() = prefs.getString(K_TOKEN, "") ?: ""
-        set(v) = prefs.edit().putString(K_TOKEN, v.trim()).apply()
+        set(v) = prefs.edit()
+            .putString(K_TOKEN, v.trim())
+            .putLong(K_TOKEN_SAVED, System.currentTimeMillis())
+            .apply()
+
+    /** When the current token was saved (epoch ms). Tokens last 90 days on the site. */
+    val tokenSavedAt: Long get() = prefs.getLong(K_TOKEN_SAVED, 0L)
+
+    /** Whether the last run finished cleanly. */
+    var lastOk: Boolean
+        get() = prefs.getBoolean(K_LAST_OK, true)
+        set(v) = prefs.edit().putBoolean(K_LAST_OK, v).apply()
 
     /**
      * Health Connect source apps to sync, in priority order. When two sources record the
@@ -71,6 +82,9 @@ class Settings(context: Context) {
         private const val K_ONBOARDED = "onboarded"
         private const val K_URL = "base_url"
         private const val K_TOKEN = "token"
+        private const val K_TOKEN_SAVED = "token_saved_at"
+        private const val K_LAST_OK = "last_ok"
+        const val TOKEN_LIFETIME_DAYS = 90L
         private const val K_SOURCES = "sources"
         private const val K_AUTO = "auto_sync"
         private const val K_INTERVAL = "interval_hours"

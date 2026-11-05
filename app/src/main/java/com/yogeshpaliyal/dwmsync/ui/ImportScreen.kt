@@ -1,8 +1,10 @@
 package com.yogeshpaliyal.dwmsync.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -36,33 +38,46 @@ fun ImportScreen(onBack: () -> Unit, onStarted: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Import older data") },
+                title = { Text("Import older workouts") },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                 },
             )
         },
-    ) { padding ->
-        Column(
-            Modifier
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                "Pick which workouts to upload. Ones already synced are skipped, so overlapping ranges are safe.",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            RangeChooser(includeNone = false, hasHistory = hc.hasHistory) { window = it }
+        bottomBar = {
             Button(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(16.dp)
+                    .heightIn(min = 52.dp),
+                shape = MaterialTheme.shapes.medium,
                 enabled = window != null && hc.hasRequired,
                 onClick = {
                     window?.let { Sync.import(context, it.from, it.to) }
                     onStarted()
                 },
-            ) { Text(window?.let { "Import ${it.label}" } ?: "Import") }
+            ) { Text("Import workouts") }
+        },
+    ) { padding ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState()),
+        ) {
+            Hint(
+                "Workouts from your selected apps in this period are uploaded as private sessions. " +
+                    "Ones already uploaded are skipped, so overlapping imports are safe.",
+            )
+            RangeChooser(includeNone = false, hasHistory = hc.hasHistory) { window = it }
+            if (!hc.hasRequired) {
+                Text(
+                    "Allow Health Connect access in Settings first.",
+                    Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
     }
 }

@@ -48,23 +48,24 @@ class SyncEngine(private val context: Context) {
 
     /** @param range null = incremental auto-sync; otherwise import exactly that window. */
     suspend fun run(range: Pair<Instant, Instant>?): Outcome {
-        val label = if (range == null) "Sync" else "Import ${formatDate(range.first)} – ${formatDate(range.second.minusMillis(1))}"
+        val prefix = if (range == null) "" else "Import of ${formatDate(range.first)} to ${formatDate(range.second.minusMillis(1))}: "
         fun finish(msg: String, outcome: Outcome): Outcome {
-            settings.lastStatus = "$label: $msg"
+            settings.lastStatus = prefix + msg
+            settings.lastOk = outcome == Outcome.DONE
             settings.lastSyncAt = System.currentTimeMillis()
             return outcome
         }
 
-        if (settings.token.isBlank()) return finish("no token set", Outcome.FATAL)
+        if (settings.token.isBlank()) return finish("No agent token is saved. Add one in Settings.", Outcome.FATAL)
         if (HealthConnectClient.getSdkStatus(context) != HealthConnectClient.SDK_AVAILABLE) {
-            return finish("Health Connect isn't available", Outcome.FATAL)
+            return finish("Health Connect isn't available on this phone. Install or update it from the Play Store.", Outcome.FATAL)
         }
         val client = HealthConnectClient.getOrCreate(context)
         if (!client.permissionController.getGrantedPermissions().containsAll(HealthPermissions.required)) {
-            return finish("Health Connect permissions not granted", Outcome.FATAL)
+            return finish("Health Connect access was removed. Allow it again in Settings.", Outcome.FATAL)
         }
 
-        if (settings.sources.isEmpty()) return finish("no source apps selected — pick some in Settings", Outcome.FATAL)
+        if (settings.sources.isEmpty()) return finish("No workout apps are selected. Choose at least one in Settings.", Outcome.FATAL)
 
         val now = Instant.now()
         val (from, to) = range ?: run {
@@ -77,9 +78,9 @@ class SyncEngine(private val context: Context) {
         val sessions = try {
             readSessions(client, from, minOf(to, now), settings.sources)
         } catch (e: SecurityException) {
-            return finish("Health Connect blocked the read (background access off?). Open the app and tap Sync now.", Outcome.FATAL)
+            return finish("Health Connect blocked a background read. Allow background access in Settings, or tap Sync now with the app open.", Outcome.FATAL)
         } catch (e: Exception) {
-            return finish("couldn't read Health Connect: ${e.message}", Outcome.RETRY)
+            return finish("Couldn't read Health Connect (${e.message}). Trying again later.", Outcome.RETRY)
         }
 
         val handled = log.handledIds()
@@ -132,23 +133,23 @@ class SyncEngine(private val context: Context) {
                     failed++
                 }
                 PostResult.Unauthorized -> return finish(
-                    "token rejected — it may have expired (90 days) or been revoked. Add a new one in Settings.",
+                    "Devs Who Move rejected the token. It may have expired or been revoked. Add a new one in Settings.",
                     Outcome.FATAL,
                 )
-                is PostResult.Retry -> return finish("paused after $sent sent (${r.reason}). Will retry.", Outcome.RETRY)
+                is PostResult.Retry -> return finish("Stopped after ${plural(sent, "upload", "uploads")} (${r.reason}). Trying again later.", Outcome.RETRY)
             }
             advance(s)
         }
 
         val newOnes = sent + skipped + failed + dupes
         return finish(
-            if (newOnes == 0) "up to date"
+            if (newOnes == 0) "Nothing new"
             else listOfNotNull(
-                "$sent sent",
-                dupes.takeIf { it > 0 }?.let { "$it duplicates" },
+                plural(sent, "workout uploaded", "workouts uploaded"),
+                dupes.takeIf { it > 0 }?.let { plural(it, "duplicate", "duplicates") },
                 skipped.takeIf { it > 0 }?.let { "$it skipped" },
                 failed.takeIf { it > 0 }?.let { "$it failed" },
-            ).joinToString(" · "),
+            ).joinToString(", "),
             Outcome.DONE,
         )
     }

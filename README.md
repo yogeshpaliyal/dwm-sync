@@ -16,9 +16,11 @@ Auto-syncs workouts from **Samsung Health → Health Connect → Devs Who Move**
 When you tap Finish, auto-sync is scheduled and the import you chose starts.
 
 ## Screens
-- **Home**: shows the status, when the last run happened, when the next auto-sync is due, and buttons for **Sync now** and **Import older data**. Below that is the list of every workout handled, each with its source app and device, title, date, type, duration, distance, Synced/Duplicate/Skipped/Failed status and upload time (or the reason it was skipped or failed).
-- **Import older data**: pick a preset or a custom date range. Workouts that were already synced are skipped.
-- **Settings**: replace the URL or token, view Health Connect permissions, turn auto-sync on or off, choose the interval (1, 3, 6 or 12 h), change the workout sources and their priority, clear the history, or run setup again.
+- **Home**: a strip of bars for the last 7 days, one per day, sized by minutes moved. Below it is the workout log grouped by day. Duplicates and skipped workouts are dimmed with the reason, failures are shown in red, and tapping a workout shows its details. **Sync now** is the floating button. **Import older workouts** is in the ⋮ menu.
+- **Settings**: a standard settings list covering the site address, agent token (with when it was saved and roughly when it expires), automatic sync and how often it checks, import, workout apps and their priority, Health Connect access, and clearing history or running setup again.
+- **Setup**: five steps, one task each, with the main button at the bottom: welcome (shows the route your data takes), Health Connect, workout apps, account, and past workouts.
+
+The app uses the Devs Who Move forest green (`#234D3C`) in both a light and a dark theme. Numbers use tabular figures so they line up.
 
 ## How it works
 - Auto-sync is a periodic WorkManager job. It needs a network connection and backs off exponentially on errors.
