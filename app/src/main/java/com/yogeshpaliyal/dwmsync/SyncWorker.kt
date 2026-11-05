@@ -64,6 +64,8 @@ class SyncEngine(private val context: Context) {
             return finish("Health Connect permissions not granted", Outcome.FATAL)
         }
 
+        if (settings.sources.isEmpty()) return finish("no source apps selected — pick some in Settings", Outcome.FATAL)
+
         val now = Instant.now()
         val (from, to) = range ?: run {
             // 1-day overlap catches late-arriving Samsung Health syncs; repeats are skipped / idempotent.
@@ -73,29 +75,54 @@ class SyncEngine(private val context: Context) {
         }
 
         val sessions = try {
-            readSessions(client, from, minOf(to, now), settings.samsungOnly)
+            readSessions(client, from, minOf(to, now), settings.sources)
         } catch (e: SecurityException) {
             return finish("Health Connect blocked the read (background access off?). Open the app and tap Sync now.", Outcome.FATAL)
         } catch (e: Exception) {
             return finish("couldn't read Health Connect: ${e.message}", Outcome.RETRY)
         }
 
-        val alreadySent = log.sentIds()
+        val handled = log.handledIds()
+        val sentEntries = log.sent().toMutableList()
+        val priority = settings.sources.withIndex().associate { (i, pkg) -> pkg to i }
+        fun rank(pkg: String) = priority[pkg] ?: Int.MAX_VALUE
+        fun sameWorkout(sport: String, start: Long, end: Long, s: Session) =
+            sport == s.sport && Dedupe.overlaps(start, end, s.start.toEpochMilli(), s.end.toEpochMilli())
+
         var sent = 0
         var skipped = 0
         var failed = 0
+        var dupes = 0
         fun advance(s: Session) {
             if (range == null && s.end.toEpochMilli() > settings.watermark) settings.watermark = s.end.toEpochMilli()
         }
 
         for (s in sessions.sortedBy { it.end }) {
-            if (s.id in alreadySent) { advance(s); continue }
+            if (s.id in handled) { advance(s); continue }
             if (s.durationMinutes < 1) {
                 log.record(SyncEntry.from(s, SyncState.SKIPPED, "Shorter than a minute"))
                 skipped++; advance(s); continue
             }
+
+            // Same workout from another app: already uploaded, or a higher-priority copy is in this batch.
+            val dupOf = sentEntries.firstOrNull { e ->
+                e.source != s.source && sameWorkout(e.sport, e.startMillis, e.endMillis, s)
+            }?.let { it.title to it.source }
+                ?: sessions.firstOrNull { t ->
+                    t.id != s.id && t.source != s.source && rank(t.source) < rank(s.source) &&
+                        sameWorkout(t.sport, t.start.toEpochMilli(), t.end.toEpochMilli(), s)
+                }?.let { it.title to it.source }
+            if (dupOf != null) {
+                val msg = "Duplicate of \"${dupOf.first}\" from ${AppLabels.label(context, dupOf.second)}"
+                log.record(SyncEntry.from(s, SyncState.DUPLICATE, msg))
+                dupes++; advance(s); continue
+            }
+
             when (val r = DwmApi.postActivity(settings.baseUrl, settings.token, s)) {
-                PostResult.Ok -> { log.record(SyncEntry.from(s, SyncState.SENT)); sent++ }
+                PostResult.Ok -> {
+                    val entry = SyncEntry.from(s, SyncState.SENT)
+                    log.record(entry); sentEntries += entry; sent++
+                }
                 PostResult.Conflict -> {
                     log.record(SyncEntry.from(s, SyncState.SKIPPED, "Changed after it was uploaded (409)"))
                     skipped++
@@ -113,9 +140,15 @@ class SyncEngine(private val context: Context) {
             advance(s)
         }
 
-        val newOnes = sent + skipped + failed
+        val newOnes = sent + skipped + failed + dupes
         return finish(
-            if (newOnes == 0) "up to date" else "$sent sent · $skipped skipped · $failed failed",
+            if (newOnes == 0) "up to date"
+            else listOfNotNull(
+                "$sent sent",
+                dupes.takeIf { it > 0 }?.let { "$it duplicates" },
+                skipped.takeIf { it > 0 }?.let { "$it skipped" },
+                failed.takeIf { it > 0 }?.let { "$it failed" },
+            ).joinToString(" · "),
             Outcome.DONE,
         )
     }

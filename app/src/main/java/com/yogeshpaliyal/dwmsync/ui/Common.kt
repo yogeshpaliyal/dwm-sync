@@ -4,13 +4,23 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,15 +40,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.core.graphics.drawable.toBitmap
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import com.yogeshpaliyal.dwmsync.AppLabels
 import com.yogeshpaliyal.dwmsync.HealthPermissions
+import com.yogeshpaliyal.dwmsync.SourceInfo
+import com.yogeshpaliyal.dwmsync.discoverSources
 import com.yogeshpaliyal.dwmsync.formatDate
 import java.time.Instant
 import java.time.LocalDate
@@ -126,6 +141,95 @@ fun HealthConnectCard(hc: HealthConnectState) {
                     Text("Needs read access to exercise sessions and distance.")
                     TextButton(onClick = hc.request) { Text("Grant access") }
                 }
+            }
+        }
+    }
+}
+
+// ---------- Source apps ----------
+
+@Composable
+fun AppIcon(pkg: String) {
+    val context = LocalContext.current
+    val bitmap = remember(pkg) { AppLabels.icon(context, pkg)?.toBitmap(96, 96)?.asImageBitmap() }
+    if (bitmap != null) {
+        Image(bitmap, contentDescription = null, modifier = Modifier.size(36.dp))
+    } else {
+        Spacer(Modifier.size(36.dp))
+    }
+}
+
+/**
+ * Lists apps that write workouts to Health Connect. Checked ones are synced, and their order is
+ * the priority used when two apps record the same workout.
+ */
+@Composable
+fun SourcesCard(hc: HealthConnectState, selected: List<String>, onChange: (List<String>) -> Unit) {
+    val context = LocalContext.current
+    var found by remember { mutableStateOf<List<SourceInfo>?>(null) }
+    LaunchedEffect(hc.hasRequired) {
+        if (hc.hasRequired) {
+            found = runCatching { discoverSources(HealthConnectClient.getOrCreate(context)) }
+                .getOrDefault(emptyList())
+        }
+    }
+    val info = found.orEmpty().associateBy { it.packageName }
+    val ordered = selected + found.orEmpty().map { it.packageName }.filterNot { it in selected }
+
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Workout sources", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Apps that save workouts to Health Connect. Checked apps are synced. If two apps record " +
+                    "the same workout, the one higher in the list is uploaded and the other is marked as a duplicate.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            when {
+                !hc.hasRequired -> Text("Grant Health Connect access to see your apps.")
+                found == null -> CircularProgressIndicator(Modifier.size(24.dp))
+                found!!.isEmpty() -> Text(
+                    "No workouts found in Health Connect in the last 90 days.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            ordered.forEach { pkg ->
+                val idx = selected.indexOf(pkg)
+                val isSelected = idx >= 0
+                val src = info[pkg]
+                val subtitle = buildList {
+                    if (isSelected && selected.size > 1) add("Priority ${idx + 1}")
+                    add(src?.let { "${it.workoutCount} workouts in 90 days" } ?: "No recent workouts")
+                    src?.devices?.takeIf { it.isNotEmpty() }?.let { add(it.joinToString(", ")) }
+                }.joinToString(" · ")
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = isSelected,
+                        onCheckedChange = { checked -> onChange(if (checked) selected + pkg else selected - pkg) },
+                    )
+                    AppIcon(pkg)
+                    Column(
+                        Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp)
+                    ) {
+                        Text(AppLabels.label(context, pkg))
+                        Text(subtitle, style = MaterialTheme.typography.bodySmall)
+                    }
+                    if (isSelected && selected.size > 1) {
+                        IconButton(
+                            enabled = idx > 0,
+                            onClick = { onChange(selected.toMutableList().apply { add(idx - 1, removeAt(idx)) }) },
+                        ) { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Move up") }
+                        IconButton(
+                            enabled = idx < selected.size - 1,
+                            onClick = { onChange(selected.toMutableList().apply { add(idx + 1, removeAt(idx)) }) },
+                        ) { Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Move down") }
+                    }
+                }
+            }
+            if (selected.isEmpty()) {
+                Text("Pick at least one app.", color = MaterialTheme.colorScheme.error)
             }
         }
     }

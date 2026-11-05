@@ -29,7 +29,7 @@ import androidx.activity.compose.BackHandler
 import com.yogeshpaliyal.dwmsync.Settings
 import com.yogeshpaliyal.dwmsync.Sync
 
-private const val STEPS = 4
+private const val STEPS = 5
 
 @Composable
 fun OnboardingScreen(onDone: () -> Unit) {
@@ -40,7 +40,7 @@ fun OnboardingScreen(onDone: () -> Unit) {
     var step by rememberSaveable { mutableStateOf(0) }
     var url by rememberSaveable { mutableStateOf(settings.baseUrl) }
     var token by rememberSaveable { mutableStateOf(settings.token) }
-    var samsungOnly by rememberSaveable { mutableStateOf(settings.samsungOnly) }
+    var sources by remember { mutableStateOf(settings.sources) }
     var error by remember { mutableStateOf<String?>(null) }
     var window by remember { mutableStateOf<DateWindow?>(null) }
 
@@ -71,6 +71,11 @@ fun OnboardingScreen(onDone: () -> Unit) {
                 HealthConnectCard(hc)
             }
             2 -> {
+                Text("Choose workout sources", style = MaterialTheme.typography.headlineSmall)
+                Text("Pick the apps whose workouts should go to Devs Who Move.")
+                SourcesCard(hc, sources) { sources = it }
+            }
+            3 -> {
                 Text("Connect your account", style = MaterialTheme.typography.headlineSmall)
                 Text("On the site, open Your agents and create a token with activities:write.")
                 OutlinedTextField(
@@ -83,12 +88,8 @@ fun OnboardingScreen(onDone: () -> Unit) {
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
                 )
-                SwitchRow(
-                    "Only Samsung Health workouts", "Avoids duplicates from other apps",
-                    samsungOnly,
-                ) { samsungOnly = it }
             }
-            3 -> {
+            4 -> {
                 Text("Import older workouts?", style = MaterialTheme.typography.headlineSmall)
                 Text("After this, new workouts sync automatically. You can import more later from the home screen.")
                 RangeChooser(includeNone = true, hasHistory = hc.hasHistory) { window = it }
@@ -101,18 +102,18 @@ fun OnboardingScreen(onDone: () -> Unit) {
             if (step > 0) TextButton(onClick = { step--; error = null }) { Text("Back") }
             Spacer(Modifier.weight(1f))
             Button(
-                enabled = step != 1 || hc.hasRequired,
+                enabled = (step != 1 || hc.hasRequired) && (step != 2 || sources.isNotEmpty()),
                 onClick = {
                     when (step) {
-                        2 -> when {
+                        3 -> when {
                             !url.trim().startsWith("https://") -> error = "Site URL must start with https://"
                             token.isBlank() -> error = "Paste your agent token"
                             else -> step++
                         }
-                        3 -> {
+                        4 -> {
                             settings.baseUrl = url
                             settings.token = token
-                            settings.samsungOnly = samsungOnly
+                            settings.sources = sources
                             settings.autoSync = true
                             val now = System.currentTimeMillis()
                             settings.syncFloor = now

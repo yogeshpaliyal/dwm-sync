@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
+import com.yogeshpaliyal.dwmsync.AppLabels
 import com.yogeshpaliyal.dwmsync.Settings
 import com.yogeshpaliyal.dwmsync.Sync
 import com.yogeshpaliyal.dwmsync.SyncEntry
@@ -133,22 +134,30 @@ fun HomeScreen(onOpenSettings: () -> Unit, onImport: () -> Unit) {
 
 @Composable
 private fun EntryRow(e: SyncEntry) {
+    val context = LocalContext.current
     val details = buildList {
         add(e.typeLabel)
         add(formatDuration(e.durationMin))
         e.distanceKm?.let { add(formatDistance(it)) }
     }.joinToString(" · ")
+    val origin = remember(e.source, e.device) {
+        listOfNotNull(e.source.takeIf { it.isNotBlank() }?.let { AppLabels.label(context, it) }, e.device)
+            .joinToString(" · ")
+    }
     val (label, color) = when (e.state) {
         SyncState.SENT -> "Synced" to MaterialTheme.colorScheme.primary
+        SyncState.DUPLICATE -> "Duplicate" to Color.Gray
         SyncState.SKIPPED -> "Skipped" to Color.Gray
         SyncState.FAILED -> "Failed" to MaterialTheme.colorScheme.error
     }
     ListItem(
         headlineContent = { Text(e.title) },
         overlineContent = { Text(formatDateTime(e.startMillis)) },
+        leadingContent = e.source.takeIf { it.isNotBlank() }?.let { { AppIcon(it) } },
         supportingContent = {
             Column {
                 Text(details)
+                if (origin.isNotEmpty()) Text(origin, style = MaterialTheme.typography.bodySmall)
                 Text(
                     e.message ?: "Uploaded ${formatDateTime(e.syncedAt)}",
                     style = MaterialTheme.typography.bodySmall,

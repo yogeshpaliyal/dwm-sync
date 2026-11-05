@@ -46,7 +46,7 @@ fun SettingsScreen(onBack: () -> Unit, onResetSetup: () -> Unit) {
     var accountMsg by remember { mutableStateOf<String?>(null) }
     var autoSync by remember { mutableStateOf(settings.autoSync) }
     var interval by remember { mutableStateOf(settings.intervalHours) }
-    var samsungOnly by remember { mutableStateOf(settings.samsungOnly) }
+    var sources by remember { mutableStateOf(settings.sources) }
     var confirm by remember { mutableStateOf<String?>(null) } // "clear" | "reset"
 
     Scaffold(
@@ -116,11 +116,12 @@ fun SettingsScreen(onBack: () -> Unit, onResetSetup: () -> Unit) {
                             }
                         }
                     }
-                    SwitchRow("Only Samsung Health workouts", "Avoids duplicates from other apps", samsungOnly) {
-                        samsungOnly = it
-                        settings.samsungOnly = it
-                    }
                 }
+            }
+
+            SourcesCard(hc, sources) {
+                sources = it
+                settings.sources = it
             }
 
             // Data

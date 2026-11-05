@@ -29,10 +29,14 @@ class Settings(context: Context) {
         get() = prefs.getString(K_TOKEN, "") ?: ""
         set(v) = prefs.edit().putString(K_TOKEN, v.trim()).apply()
 
-    /** Only sync sessions recorded by Samsung Health (avoids duplicates from other apps). */
-    var samsungOnly: Boolean
-        get() = prefs.getBoolean(K_SAMSUNG, true)
-        set(v) = prefs.edit().putBoolean(K_SAMSUNG, v).apply()
+    /**
+     * Health Connect source apps to sync, in priority order. When two sources record the
+     * same workout, the one earlier in this list wins.
+     */
+    var sources: List<String>
+        get() = prefs.getString(K_SOURCES, null)?.split(',')?.filter { it.isNotBlank() }
+            ?: listOf(SAMSUNG_HEALTH_PACKAGE)
+        set(v) = prefs.edit().putString(K_SOURCES, v.distinct().joinToString(",")).apply()
 
     var autoSync: Boolean
         get() = prefs.getBoolean(K_AUTO, true)
@@ -67,7 +71,7 @@ class Settings(context: Context) {
         private const val K_ONBOARDED = "onboarded"
         private const val K_URL = "base_url"
         private const val K_TOKEN = "token"
-        private const val K_SAMSUNG = "samsung_only"
+        private const val K_SOURCES = "sources"
         private const val K_AUTO = "auto_sync"
         private const val K_INTERVAL = "interval_hours"
         private const val K_FLOOR = "sync_floor"

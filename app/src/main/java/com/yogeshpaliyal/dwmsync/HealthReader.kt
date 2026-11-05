@@ -45,6 +45,7 @@ data class Session(
     val end: Instant,
     val distanceKm: Double?,
     val source: String,
+    val device: String?,
 ) {
     val durationMinutes: Int get() = Duration.between(start, end).toMinutes().toInt()
 }
@@ -53,9 +54,11 @@ suspend fun readSessions(
     client: HealthConnectClient,
     from: Instant,
     to: Instant,
-    samsungOnly: Boolean,
+    sources: List<String>,
 ): List<Session> {
-    val origins = if (samsungOnly) setOf(DataOrigin(SAMSUNG_HEALTH_PACKAGE)) else emptySet()
+    // An empty dataOriginFilter means "all apps", so no sources selected must mean nothing.
+    if (sources.isEmpty()) return emptyList()
+    val origins = sources.map { DataOrigin(it) }.toSet()
     val out = mutableListOf<Session>()
     var pageToken: String? = null
     do {
@@ -88,6 +91,7 @@ suspend fun readSessions(
                 end = r.endTime,
                 distanceKm = distanceKm?.takeIf { it > 0.0 },
                 source = r.metadata.dataOrigin.packageName,
+                device = deviceLabel(r.metadata.device),
             )
         }
         pageToken = response.pageToken

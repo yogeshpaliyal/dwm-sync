@@ -8,7 +8,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
-enum class SyncState { SENT, SKIPPED, FAILED }
+enum class SyncState { SENT, DUPLICATE, SKIPPED, FAILED }
 
 data class SyncEntry(
     val hcId: String,
@@ -16,16 +16,20 @@ data class SyncEntry(
     val sport: String,
     val typeLabel: String,
     val startMillis: Long,
+    val endMillis: Long,
     val durationMin: Int,
     val distanceKm: Double?,
+    val source: String,
+    val device: String?,
     val state: SyncState,
     val message: String?,
     val syncedAt: Long,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("hcId", hcId); put("title", title); put("sport", sport); put("typeLabel", typeLabel)
-        put("start", startMillis); put("duration", durationMin)
+        put("start", startMillis); put("end", endMillis); put("duration", durationMin)
         distanceKm?.let { put("distance", it) }
+        put("source", source); device?.let { put("device", it) }
         put("state", state.name); message?.let { put("message", it) }; put("syncedAt", syncedAt)
     }
 
@@ -36,8 +40,11 @@ data class SyncEntry(
             sport = o.optString("sport"),
             typeLabel = o.optString("typeLabel"),
             startMillis = o.getLong("start"),
+            endMillis = o.optLong("end", o.getLong("start") + o.optInt("duration") * 60_000L),
             durationMin = o.optInt("duration"),
             distanceKm = if (o.has("distance")) o.getDouble("distance") else null,
+            source = o.optString("source"),
+            device = if (o.has("device")) o.getString("device") else null,
             state = runCatching { SyncState.valueOf(o.getString("state")) }.getOrDefault(SyncState.FAILED),
             message = if (o.has("message")) o.getString("message") else null,
             syncedAt = o.optLong("syncedAt"),
@@ -45,8 +52,9 @@ data class SyncEntry(
 
         fun from(s: Session, state: SyncState, message: String? = null) = SyncEntry(
             hcId = s.id, title = s.title, sport = s.sport, typeLabel = s.typeLabel,
-            startMillis = s.start.toEpochMilli(), durationMin = s.durationMinutes,
-            distanceKm = s.distanceKm, state = state, message = message,
+            startMillis = s.start.toEpochMilli(), endMillis = s.end.toEpochMilli(),
+            durationMin = s.durationMinutes, distanceKm = s.distanceKm,
+            source = s.source, device = s.device, state = state, message = message,
             syncedAt = System.currentTimeMillis(),
         )
     }
@@ -58,7 +66,12 @@ class SyncLog private constructor(private val file: File) {
     private val _entries = MutableStateFlow(load())
     val entries: StateFlow<List<SyncEntry>> = _entries.asStateFlow()
 
-    fun sentIds(): Set<String> = _entries.value.filter { it.state == SyncState.SENT }.map { it.hcId }.toSet()
+    /** Workouts that need no further action: uploaded, or recognised as a duplicate. */
+    fun handledIds(): Set<String> = _entries.value
+        .filter { it.state == SyncState.SENT || it.state == SyncState.DUPLICATE }
+        .map { it.hcId }.toSet()
+
+    fun sent(): List<SyncEntry> = _entries.value.filter { it.state == SyncState.SENT }
 
     @Synchronized
     fun record(entry: SyncEntry) {

@@ -11,6 +11,14 @@
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
+        <!-- Lets us show the names and icons of apps that write to Health Connect -->
+        <intent>
+            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+            <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+        </intent>
     </queries>
 
     <application
