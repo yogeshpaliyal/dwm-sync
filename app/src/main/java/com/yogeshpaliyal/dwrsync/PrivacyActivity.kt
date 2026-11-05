@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync
+package com.yogeshpaliyal.dwrsync
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import com.yogeshpaliyal.dwmsync.ui.DwmTheme
+import com.yogeshpaliyal.dwrsync.ui.DwrTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
@@ -21,7 +21,7 @@ class PrivacyActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            DwmTheme {
+            DwrTheme {
                 Surface(Modifier.fillMaxSize()) {
                     Column(
                         Modifier.safeDrawingPadding().padding(24.dp),

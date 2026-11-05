@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync.ui
+package com.yogeshpaliyal.dwrsync.ui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsBike

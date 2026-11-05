@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync.ui
+package com.yogeshpaliyal.dwrsync.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -29,13 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.yogeshpaliyal.dwmsync.BuildConfig
-import com.yogeshpaliyal.dwmsync.Settings
-import com.yogeshpaliyal.dwmsync.Sync
-import com.yogeshpaliyal.dwmsync.SyncLog
-import com.yogeshpaliyal.dwmsync.formatDate
-import com.yogeshpaliyal.dwmsync.localDate
-import com.yogeshpaliyal.dwmsync.plural
+import com.yogeshpaliyal.dwrsync.BuildConfig
+import com.yogeshpaliyal.dwrsync.Settings
+import com.yogeshpaliyal.dwrsync.Sync
+import com.yogeshpaliyal.dwrsync.SyncLog
+import com.yogeshpaliyal.dwrsync.formatDate
+import com.yogeshpaliyal.dwrsync.localDate
+import com.yogeshpaliyal.dwrsync.plural
 import java.time.LocalDate
 
 private enum class Dialog { Url, Token, Interval, ClearHistory, RerunSetup }

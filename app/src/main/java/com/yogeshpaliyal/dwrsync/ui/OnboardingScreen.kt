@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync.ui
+package com.yogeshpaliyal.dwrsync.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -51,10 +51,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.yogeshpaliyal.dwmsync.R
-import com.yogeshpaliyal.dwmsync.SAMSUNG_HEALTH_PACKAGE
-import com.yogeshpaliyal.dwmsync.Settings
-import com.yogeshpaliyal.dwmsync.Sync
+import com.yogeshpaliyal.dwrsync.R
+import com.yogeshpaliyal.dwrsync.SAMSUNG_HEALTH_PACKAGE
+import com.yogeshpaliyal.dwrsync.Settings
+import com.yogeshpaliyal.dwrsync.Sync
 
 private const val STEPS = 5
 

@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync.ui
+package com.yogeshpaliyal.dwrsync.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.yogeshpaliyal.dwmsync.Sync
+import com.yogeshpaliyal.dwrsync.Sync
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

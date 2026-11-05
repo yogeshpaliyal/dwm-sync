@@ -8,10 +8,10 @@
 
 # WorkManager creates the worker by class name. Its consumer rules cover this already;
 # kept explicitly because a renamed worker would break already-scheduled jobs after an update.
--keep class com.yogeshpaliyal.dwmsync.SyncWorker { <init>(android.content.Context, androidx.work.WorkerParameters); }
+-keep class com.yogeshpaliyal.dwrsync.SyncWorker { <init>(android.content.Context, androidx.work.WorkerParameters); }
 
 # Sync log state is stored by enum name (SyncState.valueOf).
--keepclassmembers enum com.yogeshpaliyal.dwmsync.SyncState { *; }
+-keepclassmembers enum com.yogeshpaliyal.dwrsync.SyncState { *; }
 
 # Tink (used by EncryptedSharedPreferences) references optional annotation and HTTP classes.
 -dontwarn com.google.errorprone.annotations.**

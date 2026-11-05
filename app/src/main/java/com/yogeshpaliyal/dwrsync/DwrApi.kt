@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync
+package com.yogeshpaliyal.dwrsync
 
 import org.json.JSONObject
 import java.io.IOException
@@ -20,7 +20,7 @@ sealed interface PostResult {
     data class Retry(val reason: String) : PostResult
 }
 
-object DwmApi {
+object DwrApi {
 
     fun postActivity(baseUrl: String, token: String, s: Session): PostResult {
         val body = JSONObject().apply {

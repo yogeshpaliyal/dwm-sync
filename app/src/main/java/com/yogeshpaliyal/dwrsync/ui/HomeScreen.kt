@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync.ui
+package com.yogeshpaliyal.dwrsync.ui
 
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
@@ -61,21 +61,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
-import com.yogeshpaliyal.dwmsync.AppLabels
-import com.yogeshpaliyal.dwmsync.Settings
-import com.yogeshpaliyal.dwmsync.Sync
-import com.yogeshpaliyal.dwmsync.SyncEntry
-import com.yogeshpaliyal.dwmsync.SyncLog
-import com.yogeshpaliyal.dwmsync.SyncState
-import com.yogeshpaliyal.dwmsync.formatDateTime
-import com.yogeshpaliyal.dwmsync.formatDayHeader
-import com.yogeshpaliyal.dwmsync.formatDistance
-import com.yogeshpaliyal.dwmsync.formatDuration
-import com.yogeshpaliyal.dwmsync.formatRelative
-import com.yogeshpaliyal.dwmsync.formatTime
-import com.yogeshpaliyal.dwmsync.localDate
-import com.yogeshpaliyal.dwmsync.plural
-import com.yogeshpaliyal.dwmsync.zone
+import com.yogeshpaliyal.dwrsync.AppLabels
+import com.yogeshpaliyal.dwrsync.Settings
+import com.yogeshpaliyal.dwrsync.Sync
+import com.yogeshpaliyal.dwrsync.SyncEntry
+import com.yogeshpaliyal.dwrsync.SyncLog
+import com.yogeshpaliyal.dwrsync.SyncState
+import com.yogeshpaliyal.dwrsync.formatDateTime
+import com.yogeshpaliyal.dwrsync.formatDayHeader
+import com.yogeshpaliyal.dwrsync.formatDistance
+import com.yogeshpaliyal.dwrsync.formatDuration
+import com.yogeshpaliyal.dwrsync.formatRelative
+import com.yogeshpaliyal.dwrsync.formatTime
+import com.yogeshpaliyal.dwrsync.localDate
+import com.yogeshpaliyal.dwrsync.plural
+import com.yogeshpaliyal.dwrsync.zone
 import java.time.LocalDate
 import java.time.format.TextStyle as DayStyle
 import java.util.Locale

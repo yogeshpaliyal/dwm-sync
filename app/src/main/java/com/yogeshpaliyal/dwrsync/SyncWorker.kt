@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync
+package com.yogeshpaliyal.dwrsync
 
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
@@ -119,7 +119,7 @@ class SyncEngine(private val context: Context) {
                 dupes++; advance(s); continue
             }
 
-            when (val r = DwmApi.postActivity(settings.baseUrl, settings.token, s)) {
+            when (val r = DwrApi.postActivity(settings.baseUrl, settings.token, s)) {
                 PostResult.Ok -> {
                     val entry = SyncEntry.from(s, SyncState.SENT)
                     log.record(entry); sentEntries += entry; sent++
@@ -156,9 +156,9 @@ class SyncEngine(private val context: Context) {
 }
 
 object Sync {
-    const val PERIODIC = "dwm-periodic-sync"
-    const val NOW = "dwm-sync-now"
-    const val IMPORT = "dwm-import"
+    const val PERIODIC = "dwr-periodic-sync"
+    const val NOW = "dwr-sync-now"
+    const val IMPORT = "dwr-import"
     val ALL = listOf(PERIODIC, NOW, IMPORT)
 
     private val constraints = Constraints.Builder()

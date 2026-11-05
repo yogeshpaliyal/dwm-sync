@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync
+package com.yogeshpaliyal.dwrsync
 
 import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow

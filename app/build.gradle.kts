@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.yogeshpaliyal.dwmsync"
+    namespace = "com.yogeshpaliyal.dwrsync"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.yogeshpaliyal.dwmsync"
+        applicationId = "com.yogeshpaliyal.dwrsync"
         minSdk = 28
         targetSdk = 36
         // CI run number, so every published build upgrades the previous one.

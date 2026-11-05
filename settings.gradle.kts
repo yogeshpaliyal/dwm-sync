@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DwmSync"
+rootProject.name = "DwrSync"
 include(":app")

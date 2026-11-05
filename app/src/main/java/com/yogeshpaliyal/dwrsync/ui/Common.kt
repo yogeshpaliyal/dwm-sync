@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync.ui
+package com.yogeshpaliyal.dwrsync.ui
 
 import android.content.Context
 import android.content.Intent
@@ -68,12 +68,12 @@ import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import com.yogeshpaliyal.dwmsync.AppLabels
-import com.yogeshpaliyal.dwmsync.HealthPermissions
-import com.yogeshpaliyal.dwmsync.SourceInfo
-import com.yogeshpaliyal.dwmsync.discoverSources
-import com.yogeshpaliyal.dwmsync.formatDate
-import com.yogeshpaliyal.dwmsync.plural
+import com.yogeshpaliyal.dwrsync.AppLabels
+import com.yogeshpaliyal.dwrsync.HealthPermissions
+import com.yogeshpaliyal.dwrsync.SourceInfo
+import com.yogeshpaliyal.dwrsync.discoverSources
+import com.yogeshpaliyal.dwrsync.formatDate
+import com.yogeshpaliyal.dwrsync.plural
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

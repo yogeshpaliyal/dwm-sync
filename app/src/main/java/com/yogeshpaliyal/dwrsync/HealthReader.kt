@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync
+package com.yogeshpaliyal.dwrsync
 
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.HealthConnectFeatures

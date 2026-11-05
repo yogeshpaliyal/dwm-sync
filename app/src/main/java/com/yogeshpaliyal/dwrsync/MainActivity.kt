@@ -1,4 +1,4 @@
-package com.yogeshpaliyal.dwmsync
+package com.yogeshpaliyal.dwrsync
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,18 +16,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.yogeshpaliyal.dwmsync.ui.DwmTheme
-import com.yogeshpaliyal.dwmsync.ui.HomeScreen
-import com.yogeshpaliyal.dwmsync.ui.ImportScreen
-import com.yogeshpaliyal.dwmsync.ui.OnboardingScreen
-import com.yogeshpaliyal.dwmsync.ui.SettingsScreen
+import com.yogeshpaliyal.dwrsync.ui.DwrTheme
+import com.yogeshpaliyal.dwrsync.ui.HomeScreen
+import com.yogeshpaliyal.dwrsync.ui.ImportScreen
+import com.yogeshpaliyal.dwrsync.ui.OnboardingScreen
+import com.yogeshpaliyal.dwrsync.ui.SettingsScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
-            DwmTheme {
+            DwrTheme {
                 Surface(Modifier.fillMaxSize()) { App() }
             }
         }
