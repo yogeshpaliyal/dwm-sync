@@ -1,13 +1,13 @@
-<img src="docs/banner.png" alt="DWM Sync: workouts from Health Connect apps, synced to Devs Who Move" width="100%">
+<img src="docs/banner.png" alt="DWM Sync: workouts from Health Connect apps, synced to Devs Who Run" width="100%">
 
 # DWM Sync
 
-An Android app that uploads the workouts your fitness apps record (Samsung Health, Google Fit, Health Sync and any other app that writes to Health Connect) to your [Devs Who Move](https://devswhorun.dev) account, automatically and in the background.
+An Android app that uploads the workouts your fitness apps record (Samsung Health, Google Fit, Health Sync and any other app that writes to Health Connect) to your [Devs Who Run](https://devswhorun.dev) account, automatically and in the background.
 
 **[Download the latest APK](https://github.com/yogeshpaliyal/dwm-sync/releases/download/latest/dwm-sync.apk)** · [Release notes](https://github.com/yogeshpaliyal/dwm-sync/releases/tag/latest)
 
 > [!NOTE]
-> This is an **unofficial**, community-built app. It isn't made, endorsed or supported by Devs Who Move. It uses the site's public agent API with a token you create yourself. For the official site, go to **[devswhorun.dev](https://devswhorun.dev)**.
+> This is an **unofficial**, community-built app. It isn't made, endorsed or supported by Devs Who Run. It uses the site's public agent API with a token you create yourself. For the official site, go to **[devswhorun.dev](https://devswhorun.dev)**.
 
 ## Screenshots
 
@@ -33,7 +33,7 @@ When you tap Finish, auto-sync is scheduled and the import you chose starts.
 - **Settings**: a standard settings list covering the site address, agent token (with when it was saved and roughly when it expires), automatic sync and how often it checks, import, workout apps and their priority, Health Connect access, and clearing history or running setup again.
 - **Setup**: five steps, one task each, with the main button at the bottom: welcome (shows the route your data takes), Health Connect, workout apps, account, and past workouts.
 
-The app uses the Devs Who Move forest green (`#234D3C`) in both a light and a dark theme. Numbers use tabular figures so they line up.
+The app uses the Devs Who Run forest green (`#234D3C`) in both a light and a dark theme. Numbers use tabular figures so they line up.
 
 ## How it works
 - Auto-sync is a periodic WorkManager job. It needs a network connection and backs off exponentially on errors.
@@ -52,7 +52,7 @@ The app uses the Devs Who Move forest green (`#234D3C`) in both a light and a da
 - Release builds use R8 to shrink, optimise and obfuscate code, and drop unused resources, which also removes the unused extended Material icons. App-specific rules are in `app/proguard-rules.pro`. Each release includes `dwm-sync-mapping.txt` for turning crash traces back into readable ones. Debug builds aren't shrunk.
 
 ## Sport mapping
-| Health Connect | Devs Who Move |
+| Health Connect | Devs Who Run |
 |---|---|
 | Running, Treadmill | Running |
 | Biking, Stationary bike | Cycling |

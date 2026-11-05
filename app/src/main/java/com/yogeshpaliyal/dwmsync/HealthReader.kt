@@ -99,7 +99,7 @@ suspend fun readSessions(
     return out
 }
 
-/** Health Connect exercise type -> (Devs Who Move sport, human label). */
+/** Health Connect exercise type -> (Devs Who Run sport, human label). */
 fun mapSport(type: Int): Pair<String, String> = when (type) {
     Ex.EXERCISE_TYPE_RUNNING -> "Running" to "Run"
     Ex.EXERCISE_TYPE_RUNNING_TREADMILL -> "Running" to "Treadmill run"

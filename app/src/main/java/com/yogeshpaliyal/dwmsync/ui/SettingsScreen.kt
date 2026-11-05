@@ -100,7 +100,7 @@ fun SettingsScreen(onBack: () -> Unit, onImport: () -> Unit, onResetSetup: () ->
             HealthConnectStatus(hc, Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
 
             SectionHeader("History on this phone")
-            PrefRow("Clear sync history", "Empties the list here. Nothing is deleted from Devs Who Move.", onClick = { dialog = Dialog.ClearHistory })
+            PrefRow("Clear sync history", "Empties the list here. Nothing is deleted from Devs Who Run.", onClick = { dialog = Dialog.ClearHistory })
             PrefRow("Run setup again", onClick = { dialog = Dialog.RerunSetup })
 
             Spacer(Modifier.height(24.dp))
@@ -156,7 +156,7 @@ fun SettingsScreen(onBack: () -> Unit, onImport: () -> Unit, onResetSetup: () ->
         Dialog.ClearHistory -> AlertDialog(
             onDismissRequest = { dialog = null },
             title = { Text("Clear sync history?") },
-            text = { Text("The list on this phone is emptied. Your workouts stay on Devs Who Move, and importing them again won't create duplicates there.") },
+            text = { Text("The list on this phone is emptied. Your workouts stay on Devs Who Run, and importing them again won't create duplicates there.") },
             confirmButton = {
                 TextButton(onClick = { SyncLog.get(context).clear(); dialog = null }) { Text("Clear history") }
             },

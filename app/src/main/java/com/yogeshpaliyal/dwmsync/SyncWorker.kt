@@ -133,7 +133,7 @@ class SyncEngine(private val context: Context) {
                     failed++
                 }
                 PostResult.Unauthorized -> return finish(
-                    "Devs Who Move rejected the token. It may have expired or been revoked. Add a new one in Settings.",
+                    "Devs Who Run rejected the token. It may have expired or been revoked. Add a new one in Settings.",
                     Outcome.FATAL,
                 )
                 is PostResult.Retry -> return finish("Stopped after ${plural(sent, "upload", "uploads")} (${r.reason}). Trying again later.", Outcome.RETRY)

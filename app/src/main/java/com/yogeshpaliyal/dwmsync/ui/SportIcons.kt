@@ -14,7 +14,7 @@ import androidx.compose.material.icons.filled.SportsTennis
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.ui.graphics.vector.ImageVector
 
-/** Icon for a workout, from its Devs Who Move sport and the more specific Health Connect label. */
+/** Icon for a workout, from its Devs Who Run sport and the more specific Health Connect label. */
 @Suppress("DEPRECATION")
 fun sportIcon(sport: String, typeLabel: String): ImageVector = when (sport) {
     "Running" -> Icons.Filled.DirectionsRun

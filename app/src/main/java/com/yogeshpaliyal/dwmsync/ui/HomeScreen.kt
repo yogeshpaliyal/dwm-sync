@@ -388,7 +388,7 @@ private fun WorkoutDetails(e: SyncEntry, onDismiss: () -> Unit) {
             Detail(
                 "Status",
                 when (e.state) {
-                    SyncState.SENT -> "Uploaded ${formatDateTime(e.syncedAt)}, private on Devs Who Move"
+                    SyncState.SENT -> "Uploaded ${formatDateTime(e.syncedAt)}, private on Devs Who Run"
                     SyncState.DUPLICATE -> e.message ?: "Duplicate, not uploaded"
                     SyncState.SKIPPED -> "Not uploaded: ${e.message ?: "skipped"}"
                     SyncState.FAILED -> "Upload failed: ${e.message ?: "unknown error"}. It will be tried again on the next sync."

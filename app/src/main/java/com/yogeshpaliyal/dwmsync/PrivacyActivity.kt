@@ -31,7 +31,7 @@ class PrivacyActivity : ComponentActivity() {
                         Text(
                             "DWM Sync reads only your exercise sessions and distance from Health Connect. " +
                                 "For each workout it sends the title, sport, start time, duration and distance " +
-                                "to the Devs Who Move site you configure, using your own agent token. " +
+                                "to the Devs Who Run site you configure, using your own agent token. " +
                                 "Uploads are always private on the site until you publish them yourself."
                         )
                         Text(

@@ -121,7 +121,7 @@ fun OnboardingScreen(onDone: () -> Unit) {
                     0 -> {
                         AppLogo(Modifier.padding(start = 24.dp, top = 32.dp))
                         Heading(
-                            "Your workouts, on Devs Who Move",
+                            "Your workouts, on Devs Who Run",
                             "DWM Sync picks up the workouts your fitness apps already record and uploads them for you. " +
                                 "Uploads stay private until you publish them on the site.",
                         )
@@ -263,7 +263,7 @@ private fun DataPath(modifier: Modifier = Modifier) {
                     Icon(Icons.Filled.DirectionsRun, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(22.dp))
                 }
             },
-            title = "Devs Who Move",
+            title = "Devs Who Run",
             body = "Each workout arrives as a private session with its sport, time, duration and distance",
             last = true,
         )

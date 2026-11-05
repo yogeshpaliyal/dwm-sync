@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Devs Who Move brand green, plus a small supporting palette. */
+/** Devs Who Run brand green, plus a small supporting palette. */
 private object Palette {
     val Forest = Color(0xFF234D3C)
     val ForestDeep = Color(0xFF0E2A1F)
