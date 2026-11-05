@@ -16,7 +16,21 @@ android {
         versionName = "1.0"
     }
 
+    // Shared debug key (standard "android" passwords) so CI builds install over each other.
+    // Not a secret: use a real key in a GitHub secret if you ever ship a release build.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = rootProject.file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
         }

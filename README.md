@@ -3,8 +3,8 @@
 Auto-syncs workouts from **Samsung Health → Health Connect → Devs Who Move** (`POST /api/activities`).
 
 ## Install
-1. Open **Actions → Build APK → latest run**, download the `dwm-sync-debug-*` artifact and unzip it. You can also open this folder in Android Studio and run it from there.
-2. Install the APK on your phone. You'll need to allow installs from your browser or file manager.
+1. Download `dwm-sync.apk` from **[Latest release](https://github.com/yogeshpaliyal/dwm-sync/releases/tag/latest)**. Every push to `main` rebuilds it. You can also open this folder in Android Studio and run it from there.
+2. Install the APK on your phone. You'll need to allow installs from your browser or file manager. New builds install over the old one, because every build is signed with the same `debug.keystore` from this repo.
 
 ## First-run setup (shown once)
 1. **Welcome**: explains what the app does.

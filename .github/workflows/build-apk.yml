@@ -8,14 +8,15 @@ on:
 
 concurrency:
   group: build-apk-${{ github.ref }}
-  cancel-in-progress: true
+  # Don't cancel a main build halfway through replacing the release.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      contents: read
+      contents: write   # needed to replace the "latest" release
 
     steps:
       - uses: actions/checkout@v4
@@ -33,10 +34,40 @@ jobs:
       - name: Build debug APK
         run: gradle assembleDebug --stacktrace
 
-      - name: Upload APK
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk dwm-sync.apk
+
+      # Pull requests: keep the APK as a run artifact only.
+      - name: Upload APK (pull requests)
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: dwm-sync-debug-${{ github.run_number }}
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 14
+          name: dwm-sync-pr-${{ github.event.pull_request.number }}
+          path: dwm-sync.apk
+          retention-days: 7
+
+      # main: replace the rolling "latest" pre-release. Re-creating it each time
+      # keeps it the newest release, so it always sits at the top of the list.
+      - name: Publish "Latest release"
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          {
+            echo "Automatic build of \`main\` at ${SHORT_SHA} ($(date -u '+%Y-%m-%d %H:%M UTC'))."
+            echo
+            echo "**Install:** download \`dwm-sync.apk\` below on your Android phone and open it. Allow installs from your browser if asked."
+            echo
+            echo "Each build installs over the previous one, so your settings and history are kept."
+            echo
+            echo "### Latest change"
+            git log -1 --pretty='- %s'
+          } > notes.md
+
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest dwm-sync.apk \
+            --title "Latest release" \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --notes-file notes.md
