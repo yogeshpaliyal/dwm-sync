@@ -36,20 +36,20 @@ jobs:
 
       - name: Collect outputs
         run: |
-          cp app/build/outputs/apk/release/app-release.apk dwm-sync.apk
-          cp app/build/outputs/mapping/release/mapping.txt dwm-sync-mapping.txt
-          echo "APK_SIZE=$(du -h dwm-sync.apk | cut -f1)" >> "$GITHUB_ENV"
-          echo "APK size: $(du -h dwm-sync.apk | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+          cp app/build/outputs/apk/release/app-release.apk dwr-sync.apk
+          cp app/build/outputs/mapping/release/mapping.txt dwr-sync-mapping.txt
+          echo "APK_SIZE=$(du -h dwr-sync.apk | cut -f1)" >> "$GITHUB_ENV"
+          echo "APK size: $(du -h dwr-sync.apk | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
 
       # Pull requests: keep the APK as a run artifact only.
       - name: Upload APK (pull requests)
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: dwm-sync-pr-${{ github.event.pull_request.number }}
+          name: dwr-sync-pr-${{ github.event.pull_request.number }}
           path: |
-            dwm-sync.apk
-            dwm-sync-mapping.txt
+            dwr-sync.apk
+            dwr-sync-mapping.txt
           retention-days: 7
 
       # main: replace the rolling "latest" pre-release. Re-creating it each time
@@ -63,16 +63,16 @@ jobs:
           {
             echo "Automatic build of \`main\` at ${SHORT_SHA} ($(date -u '+%Y-%m-%d %H:%M UTC'))."
             echo
-            echo "**Install:** download \`dwm-sync.apk\` (${APK_SIZE}) below on your Android phone and open it. Allow installs from your browser if asked."
+            echo "**Install:** download \`dwr-sync.apk\` (${APK_SIZE}) below on your Android phone and open it. Allow installs from your browser if asked."
             echo
-            echo "Each build installs over the previous one, so your settings and history are kept. \`dwm-sync-mapping.txt\` turns obfuscated crash traces back into readable ones."
+            echo "Each build installs over the previous one, so your settings and history are kept. \`dwr-sync-mapping.txt\` turns obfuscated crash traces back into readable ones."
             echo
             echo "### Latest change"
             git log -1 --pretty='- %s'
           } > notes.md
 
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest dwm-sync.apk dwm-sync-mapping.txt \
+          gh release create latest dwr-sync.apk dwr-sync-mapping.txt \
             --title "Latest release" \
             --prerelease \
             --target "$GITHUB_SHA" \
