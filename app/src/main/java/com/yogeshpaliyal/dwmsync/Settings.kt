@@ -16,6 +16,11 @@ class Settings(context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
     )
 
+    /** First-run setup finished. */
+    var onboarded: Boolean
+        get() = prefs.getBoolean(K_ONBOARDED, false)
+        set(v) = prefs.edit().putBoolean(K_ONBOARDED, v).apply()
+
     var baseUrl: String
         get() = prefs.getString(K_URL, DEFAULT_URL) ?: DEFAULT_URL
         set(v) = prefs.edit().putString(K_URL, v.trim().trimEnd('/')).apply()
@@ -24,20 +29,32 @@ class Settings(context: Context) {
         get() = prefs.getString(K_TOKEN, "") ?: ""
         set(v) = prefs.edit().putString(K_TOKEN, v.trim()).apply()
 
-    /** How many days back to import on the very first sync. */
-    var backfillDays: Int
-        get() = prefs.getInt(K_DAYS, 30)
-        set(v) = prefs.edit().putInt(K_DAYS, v.coerceIn(1, 3650)).apply()
-
     /** Only sync sessions recorded by Samsung Health (avoids duplicates from other apps). */
     var samsungOnly: Boolean
         get() = prefs.getBoolean(K_SAMSUNG, true)
         set(v) = prefs.edit().putBoolean(K_SAMSUNG, v).apply()
 
-    /** End time (epoch ms) of the latest session handled. 0 = never synced. */
+    var autoSync: Boolean
+        get() = prefs.getBoolean(K_AUTO, true)
+        set(v) = prefs.edit().putBoolean(K_AUTO, v).apply()
+
+    var intervalHours: Int
+        get() = prefs.getInt(K_INTERVAL, 3)
+        set(v) = prefs.edit().putInt(K_INTERVAL, v).apply()
+
+    /** Auto-sync never looks before this time (epoch ms). Older data comes in via "Import older data". */
+    var syncFloor: Long
+        get() = prefs.getLong(K_FLOOR, 0L)
+        set(v) = prefs.edit().putLong(K_FLOOR, v).apply()
+
+    /** End time (epoch ms) of the latest session handled by auto-sync. 0 = never. */
     var watermark: Long
         get() = prefs.getLong(K_WATERMARK, 0L)
         set(v) = prefs.edit().putLong(K_WATERMARK, v).apply()
+
+    var lastSyncAt: Long
+        get() = prefs.getLong(K_LAST_SYNC, 0L)
+        set(v) = prefs.edit().putLong(K_LAST_SYNC, v).apply()
 
     var lastStatus: String
         get() = prefs.getString(K_STATUS, "Not synced yet") ?: ""
@@ -45,11 +62,17 @@ class Settings(context: Context) {
 
     companion object {
         const val DEFAULT_URL = "https://devswhorun.dev"
+        val INTERVAL_OPTIONS = listOf(1, 3, 6, 12)
+
+        private const val K_ONBOARDED = "onboarded"
         private const val K_URL = "base_url"
         private const val K_TOKEN = "token"
-        private const val K_DAYS = "backfill_days"
         private const val K_SAMSUNG = "samsung_only"
+        private const val K_AUTO = "auto_sync"
+        private const val K_INTERVAL = "interval_hours"
+        private const val K_FLOOR = "sync_floor"
         private const val K_WATERMARK = "watermark"
+        private const val K_LAST_SYNC = "last_sync_at"
         private const val K_STATUS = "last_status"
     }
 }

@@ -2,18 +2,35 @@
 
 Auto-syncs workouts from **Samsung Health → Health Connect → Devs Who Move** (`POST /api/activities`).
 
-## Setup
-1. Get the APK: open **Actions → Build APK → latest run**, download the `dwm-sync-debug-*` artifact and unzip it. Or open this folder in Android Studio and run it.
-2. Install it on your phone. You'll need to allow installs from your browser or file manager.
-3. Tap **Grant access** and allow Exercise, Distance, background access and past-data access.
-4. On devswhorun.dev, go to **Your agents** and create a token with `activities:write`. Paste it into the app.
-5. Tap **Save & turn on auto-sync**.
+## Install
+1. Open **Actions → Build APK → latest run**, download the `dwm-sync-debug-*` artifact and unzip it. You can also open this folder in Android Studio and run it from there.
+2. Install the APK on your phone. You'll need to allow installs from your browser or file manager.
+
+## First-run setup (shown once)
+1. **Welcome**: explains what the app does.
+2. **Health Connect**: grant access to Exercise and Distance, plus background and past-data access if offered.
+3. **Account**: enter the site URL and an agent token (`activities:write`, created under **Your agents** on the site). You can also turn on *Only Samsung Health workouts*.
+4. **Older workouts**: choose *Only new from now on*, the last 7, 30 or 90 days, the last 12 months, or **Pick dates…** for a custom range.
+
+When you tap Finish, auto-sync is scheduled and the import you chose starts.
+
+## Screens
+- **Home**: shows the status, when the last run happened, when the next auto-sync is due, and buttons for **Sync now** and **Import older data**. Below that is the list of every workout handled, each with its title, date, type, duration, distance, Synced/Skipped/Failed status and upload time (or the reason it was skipped or failed).
+- **Import older data**: pick a preset or a custom date range. Workouts that were already synced are skipped.
+- **Settings**: replace the URL or token, view Health Connect permissions, turn auto-sync on or off, choose the interval (1, 3, 6 or 12 h), toggle the Samsung-only filter, clear the history, or run setup again.
 
 ## How it works
-- WorkManager runs every ~3 hours when the phone is online, plus right away when you save.
-- It reads `ExerciseSessionRecord` from just before the last synced session, which defaults to the last 30 days on the first run, and adds up `DistanceRecord` over each session.
-- The `Idempotency-Key` is `hc-<Health Connect record id>`, so retries and overlapping runs never create duplicates.
-- Response handling: 2xx counts as sent. 409 or other 4xx responses skip that session. 401/403 stop the sync, because the token has expired (90 days) or was revoked. Network errors, 429 and 5xx retry with backoff.
+- Auto-sync is a periodic WorkManager job. It needs a network connection and backs off exponentially on errors.
+- Each auto-sync reads `ExerciseSessionRecord` starting one day before the last synced session. It never looks earlier than the time setup finished, because older data comes in through imports. Distance is the sum of `DistanceRecord` over each session.
+- Imports are a separate one-off job for the window you picked. They don't move the auto-sync position.
+- The history is kept in `files/sync_log.json`, up to 2,000 entries. Workouts already marked Synced aren't sent again.
+- The `Idempotency-Key` is `hc-<Health Connect record id>`, so retries and overlapping runs never create duplicates on the server.
+- Responses are handled like this:
+  - 2xx: marked Synced.
+  - 409: marked Skipped (the workout changed after it was uploaded).
+  - Other 4xx: marked Failed, with the error shown.
+  - 401/403: the sync stops and asks for a new token.
+  - Network errors, 429 and 5xx: retried later.
 - The token is stored in EncryptedSharedPreferences, and backups are disabled.
 
 ## Sport mapping
@@ -28,6 +45,6 @@ Auto-syncs workouts from **Samsung Health → Health Connect → Devs Who Move**
 | Everything else (hike, yoga, badminton, cricket…) | Other, with the type kept in the notes |
 
 ## Notes
-- Samsung Health only pushes to Health Connect when Samsung Health syncs. Opening Samsung Health occasionally keeps things fresh.
-- If the status shows "blocked the read", your Health Connect version doesn't allow background reads. Tap **Save & sync now** while the app is open.
-- The **Only Samsung Health workouts** switch filters by `com.sec.android.app.shealth`. Turn it off if you also log workouts in other apps.
+- Samsung Health only writes to Health Connect when Samsung Health itself syncs. Opening it now and then keeps the data fresh.
+- Without past-data access, Health Connect only shares about the last 30 days, so older imports come back empty.
+- If the status says "blocked the read", your Health Connect version doesn't allow background reads. Tap **Sync now** while the app is open.

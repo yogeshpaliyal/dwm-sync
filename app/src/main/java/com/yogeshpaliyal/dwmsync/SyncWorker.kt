@@ -12,90 +12,136 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.text.DateFormat
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.Date
 import java.util.concurrent.TimeUnit
 
+/** Runs incremental auto-sync, or a one-off import when given a date range. */
 class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        val settings = Settings(applicationContext)
-        fun status(msg: String) {
-            settings.lastStatus = "${DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date())} — $msg"
+        val from = inputData.getLong(KEY_FROM, -1L)
+        val to = inputData.getLong(KEY_TO, -1L)
+        val range = if (from > 0 && to > from) Instant.ofEpochMilli(from) to Instant.ofEpochMilli(to) else null
+        when (SyncEngine(applicationContext).run(range)) {
+            SyncEngine.Outcome.DONE -> Result.success()
+            SyncEngine.Outcome.RETRY -> Result.retry()
+            SyncEngine.Outcome.FATAL -> Result.failure()
+        }
+    }
+
+    companion object {
+        const val KEY_FROM = "from"
+        const val KEY_TO = "to"
+    }
+}
+
+class SyncEngine(private val context: Context) {
+
+    enum class Outcome { DONE, RETRY, FATAL }
+
+    private val settings = Settings(context)
+    private val log = SyncLog.get(context)
+
+    /** @param range null = incremental auto-sync; otherwise import exactly that window. */
+    suspend fun run(range: Pair<Instant, Instant>?): Outcome {
+        val label = if (range == null) "Sync" else "Import ${formatDate(range.first)} – ${formatDate(range.second.minusMillis(1))}"
+        fun finish(msg: String, outcome: Outcome): Outcome {
+            settings.lastStatus = "$label: $msg"
+            settings.lastSyncAt = System.currentTimeMillis()
+            return outcome
         }
 
-        if (settings.token.isBlank()) {
-            status("No token set"); return@withContext Result.failure()
+        if (settings.token.isBlank()) return finish("no token set", Outcome.FATAL)
+        if (HealthConnectClient.getSdkStatus(context) != HealthConnectClient.SDK_AVAILABLE) {
+            return finish("Health Connect isn't available", Outcome.FATAL)
         }
-        if (HealthConnectClient.getSdkStatus(applicationContext) != HealthConnectClient.SDK_AVAILABLE) {
-            status("Health Connect isn't available"); return@withContext Result.failure()
-        }
-        val client = HealthConnectClient.getOrCreate(applicationContext)
+        val client = HealthConnectClient.getOrCreate(context)
         if (!client.permissionController.getGrantedPermissions().containsAll(HealthPermissions.required)) {
-            status("Health Connect permissions not granted"); return@withContext Result.failure()
+            return finish("Health Connect permissions not granted", Outcome.FATAL)
         }
 
         val now = Instant.now()
-        val from = if (settings.watermark == 0L) {
-            now.minus(settings.backfillDays.toLong(), ChronoUnit.DAYS)
-        } else {
-            // 1-day overlap catches late-arriving syncs; Idempotency-Key makes repeats harmless.
-            Instant.ofEpochMilli(settings.watermark).minus(1, ChronoUnit.DAYS)
+        val (from, to) = range ?: run {
+            // 1-day overlap catches late-arriving Samsung Health syncs; repeats are skipped / idempotent.
+            val wm = settings.watermark
+            val start = if (wm == 0L) now.minus(1, ChronoUnit.DAYS) else Instant.ofEpochMilli(wm).minus(1, ChronoUnit.DAYS)
+            maxOf(start, Instant.ofEpochMilli(settings.syncFloor)) to now
         }
 
         val sessions = try {
-            readSessions(client, from, now, settings.samsungOnly)
+            readSessions(client, from, minOf(to, now), settings.samsungOnly)
         } catch (e: SecurityException) {
-            status("Health Connect blocked the read (background access off?). Open the app and tap Sync now.")
-            return@withContext Result.failure()
+            return finish("Health Connect blocked the read (background access off?). Open the app and tap Sync now.", Outcome.FATAL)
         } catch (e: Exception) {
-            status("Couldn't read Health Connect: ${e.message}")
-            return@withContext Result.retry()
+            return finish("couldn't read Health Connect: ${e.message}", Outcome.RETRY)
         }
 
-        var uploaded = 0
+        val alreadySent = log.sentIds()
+        var sent = 0
         var skipped = 0
-        for (s in sessions.sortedBy { it.end }) {
-            if (s.durationMinutes < 1) { skipped++; continue }
-            when (val r = DwmApi.postActivity(settings.baseUrl, settings.token, s)) {
-                PostResult.Ok -> uploaded++
-                PostResult.Conflict, is PostResult.Rejected -> skipped++
-                PostResult.Unauthorized -> {
-                    status("Token rejected — it may have expired (90 days) or been revoked. Paste a new one.")
-                    return@withContext Result.failure()
-                }
-                is PostResult.Retry -> {
-                    status("Paused after $uploaded uploads: ${r.reason}. Will retry.")
-                    return@withContext Result.retry()
-                }
-            }
-            if (s.end.toEpochMilli() > settings.watermark) settings.watermark = s.end.toEpochMilli()
+        var failed = 0
+        fun advance(s: Session) {
+            if (range == null && s.end.toEpochMilli() > settings.watermark) settings.watermark = s.end.toEpochMilli()
         }
 
-        status("Checked ${sessions.size} sessions · $uploaded sent · $skipped skipped")
-        Result.success()
+        for (s in sessions.sortedBy { it.end }) {
+            if (s.id in alreadySent) { advance(s); continue }
+            if (s.durationMinutes < 1) {
+                log.record(SyncEntry.from(s, SyncState.SKIPPED, "Shorter than a minute"))
+                skipped++; advance(s); continue
+            }
+            when (val r = DwmApi.postActivity(settings.baseUrl, settings.token, s)) {
+                PostResult.Ok -> { log.record(SyncEntry.from(s, SyncState.SENT)); sent++ }
+                PostResult.Conflict -> {
+                    log.record(SyncEntry.from(s, SyncState.SKIPPED, "Changed after it was uploaded (409)"))
+                    skipped++
+                }
+                is PostResult.Rejected -> {
+                    log.record(SyncEntry.from(s, SyncState.FAILED, "HTTP ${r.code}: ${r.body}".trim()))
+                    failed++
+                }
+                PostResult.Unauthorized -> return finish(
+                    "token rejected — it may have expired (90 days) or been revoked. Add a new one in Settings.",
+                    Outcome.FATAL,
+                )
+                is PostResult.Retry -> return finish("paused after $sent sent (${r.reason}). Will retry.", Outcome.RETRY)
+            }
+            advance(s)
+        }
+
+        val newOnes = sent + skipped + failed
+        return finish(
+            if (newOnes == 0) "up to date" else "$sent sent · $skipped skipped · $failed failed",
+            Outcome.DONE,
+        )
     }
 }
 
 object Sync {
     const val PERIODIC = "dwm-periodic-sync"
     const val NOW = "dwm-sync-now"
+    const val IMPORT = "dwm-import"
+    val ALL = listOf(PERIODIC, NOW, IMPORT)
 
     private val constraints = Constraints.Builder()
         .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()
 
-    fun schedule(context: Context) {
-        val request = PeriodicWorkRequestBuilder<SyncWorker>(3, TimeUnit.HOURS)
+    fun schedule(context: Context, hours: Int) {
+        val request = PeriodicWorkRequestBuilder<SyncWorker>(hours.toLong(), TimeUnit.HOURS)
             .setConstraints(constraints)
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.MINUTES)
             .build()
         WorkManager.getInstance(context)
             .enqueueUniquePeriodicWork(PERIODIC, ExistingPeriodicWorkPolicy.UPDATE, request)
+    }
+
+    fun cancel(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork(PERIODIC)
     }
 
     fun runNow(context: Context) {
@@ -105,7 +151,12 @@ object Sync {
         WorkManager.getInstance(context).enqueueUniqueWork(NOW, ExistingWorkPolicy.REPLACE, request)
     }
 
-    fun cancel(context: Context) {
-        WorkManager.getInstance(context).cancelUniqueWork(PERIODIC)
+    fun import(context: Context, from: Instant, to: Instant) {
+        val request = OneTimeWorkRequestBuilder<SyncWorker>()
+            .setConstraints(constraints)
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.MINUTES)
+            .setInputData(workDataOf(SyncWorker.KEY_FROM to from.toEpochMilli(), SyncWorker.KEY_TO to to.toEpochMilli()))
+            .build()
+        WorkManager.getInstance(context).enqueueUniqueWork(IMPORT, ExistingWorkPolicy.REPLACE, request)
     }
 }
