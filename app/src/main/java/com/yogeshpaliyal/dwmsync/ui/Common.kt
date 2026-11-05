@@ -213,7 +213,11 @@ fun SourcesCard(hc: HealthConnectState, selected: List<String>, onChange: (List<
                             .weight(1f)
                             .padding(start = 12.dp)
                     ) {
-                        Text(AppLabels.label(context, pkg))
+                        val name = AppLabels.label(context, pkg)
+                        Text(name)
+                        if (name != pkg) {
+                            Text(pkg, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                        }
                         Text(subtitle, style = MaterialTheme.typography.bodySmall)
                     }
                     if (isSelected && selected.size > 1) {
