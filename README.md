@@ -1,6 +1,6 @@
-<img src="docs/banner.png" alt="DWM Sync: workouts from Health Connect apps, synced to Devs Who Run" width="100%">
+<img src="docs/banner.png" alt="DWR Sync: workouts from Health Connect apps, synced to Devs Who Run" width="100%">
 
-# DWM Sync
+# DWR Sync
 
 An Android app that uploads the workouts your fitness apps record (Samsung Health, Google Fit, Health Sync and any other app that writes to Health Connect) to your [Devs Who Run](https://devswhorun.dev) account, automatically and in the background.
 

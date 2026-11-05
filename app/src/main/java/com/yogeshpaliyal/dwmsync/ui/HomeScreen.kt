@@ -113,7 +113,7 @@ fun HomeScreen(onOpenSettings: () -> Unit, onImport: () -> Unit) {
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text("DWM Sync") },
+                title = { Text("DWR Sync") },
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = onOpenSettings) { Icon(Icons.Outlined.Settings, contentDescription = "Settings") }

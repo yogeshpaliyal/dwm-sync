@@ -149,7 +149,7 @@ fun HealthConnectStatus(hc: HealthConnectState, modifier: Modifier = Modifier) {
             }
             hc.hasAll -> {
                 StatusLine(Icons.Filled.CheckCircle, colors.primary, "Access allowed",
-                    "DWM Sync can read workouts and distance, including in the background and from the past.")
+                    "DWR Sync can read workouts and distance, including in the background and from the past.")
                 ActionRow { TextButton(onClick = { openHealthConnectSettings(context) }) { Text("Manage in Health Connect") } }
             }
             hc.hasRequired -> {
@@ -159,7 +159,7 @@ fun HealthConnectStatus(hc: HealthConnectState, modifier: Modifier = Modifier) {
             }
             else -> {
                 StatusLine(Icons.Outlined.Lock, colors.onSurfaceVariant, "Access needed",
-                    "DWM Sync only reads workouts and distance. It never writes to Health Connect.")
+                    "DWR Sync only reads workouts and distance. It never writes to Health Connect.")
                 ActionRow { Button(onClick = hc.request) { Text("Allow access") } }
             }
         }

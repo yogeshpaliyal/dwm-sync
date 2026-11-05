@@ -43,7 +43,7 @@ object DwmApi {
                 setRequestProperty("Content-Type", "application/json")
                 setRequestProperty("Accept", "application/json")
                 setRequestProperty("Idempotency-Key", "hc-${s.id}")
-                setRequestProperty("User-Agent", "DwmSync-Android/1.0")
+                setRequestProperty("User-Agent", "DwrSync-Android/1.0")
                 setFixedLengthStreamingMode(body.size)
             }
         } catch (e: IOException) {

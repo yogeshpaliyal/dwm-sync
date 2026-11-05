@@ -122,7 +122,7 @@ fun OnboardingScreen(onDone: () -> Unit) {
                         AppLogo(Modifier.padding(start = 24.dp, top = 32.dp))
                         Heading(
                             "Your workouts, on Devs Who Run",
-                            "DWM Sync picks up the workouts your fitness apps already record and uploads them for you. " +
+                            "DWR Sync picks up the workouts your fitness apps already record and uploads them for you. " +
                                 "Uploads stay private until you publish them on the site.",
                         )
                         DataPath(Modifier.padding(horizontal = 24.dp, vertical = 16.dp))
@@ -130,7 +130,7 @@ fun OnboardingScreen(onDone: () -> Unit) {
                     1 -> {
                         Heading(
                             "Allow access to workouts",
-                            "Health Connect asks which data DWM Sync may read. Allow background and past data too, " +
+                            "Health Connect asks which data DWR Sync may read. Allow background and past data too, " +
                                 "so syncing works with the app closed and older workouts can be imported.",
                         )
                         HealthConnectStatus(hc, Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
@@ -250,7 +250,7 @@ private fun DataPath(modifier: Modifier = Modifier) {
         PathStop(
             icon = { AppIcon(HEALTH_CONNECT_PACKAGE, 40.dp) },
             title = "Health Connect",
-            body = "Keeps the workouts on your phone. DWM Sync only reads them.",
+            body = "Keeps the workouts on your phone. DWR Sync only reads them.",
             last = false,
         )
         PathStop(
@@ -303,7 +303,7 @@ private fun AppLogo(modifier: Modifier = Modifier) {
     ) {
         Image(
             painter = painterResource(R.drawable.ic_launcher_foreground),
-            contentDescription = "DWM Sync",
+            contentDescription = "DWR Sync",
             modifier = Modifier.fillMaxSize(),
         )
     }

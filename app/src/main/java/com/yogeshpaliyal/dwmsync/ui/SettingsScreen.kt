@@ -106,7 +106,7 @@ fun SettingsScreen(onBack: () -> Unit, onImport: () -> Unit, onResetSetup: () ->
             Spacer(Modifier.height(24.dp))
             HorizontalDivider(Modifier.padding(horizontal = 20.dp))
             Text(
-                "DWM Sync ${BuildConfig.VERSION_NAME}",
+                "DWR Sync ${BuildConfig.VERSION_NAME}",
                 Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

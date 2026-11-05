@@ -27,9 +27,9 @@ class PrivacyActivity : ComponentActivity() {
                         Modifier.safeDrawingPadding().padding(24.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Text("How DWM Sync uses your data", style = MaterialTheme.typography.headlineSmall)
+                        Text("How DWR Sync uses your data", style = MaterialTheme.typography.headlineSmall)
                         Text(
-                            "DWM Sync reads only your exercise sessions and distance from Health Connect. " +
+                            "DWR Sync reads only your exercise sessions and distance from Health Connect. " +
                                 "For each workout it sends the title, sport, start time, duration and distance " +
                                 "to the Devs Who Run site you configure, using your own agent token. " +
                                 "Uploads are always private on the site until you publish them yourself."

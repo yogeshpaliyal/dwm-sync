@@ -1,4 +1,4 @@
-# R8 rules for DWM Sync.
+# R8 rules for DWR Sync.
 # AndroidX libraries (Compose, WorkManager, Health Connect, security-crypto) ship their own
 # consumer rules, so only app-specific and missing-class rules live here.
 

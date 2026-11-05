@@ -16,7 +16,7 @@
   <path d="M57,35 L44,35 A19,19 0 0 0 44,73 L64,73 A19,19 0 0 0 83,54 L83,48" stroke="#F2F7F3"/>
   <path d="M77,51 L83,45 L89,51" stroke="#F2F7F3"/></g></g>
 </g>
-<text x="80" y="345" font-family="Inter Display" font-weight="600" font-size="78" fill="#F2F7F3" letter-spacing="-1.5">DWM Sync</text>
+<text x="80" y="345" font-family="Inter Display" font-weight="600" font-size="78" fill="#F2F7F3" letter-spacing="-1.5">DWR Sync</text>
 <text font-family="Inter" font-size="28" fill="#CFE6D8">
   <tspan x="82" y="402">Workouts from Samsung Health, Google</tspan>
   <tspan x="82" y="442">Fit and other Health Connect apps,</tspan>
