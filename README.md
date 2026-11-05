@@ -3,7 +3,7 @@
 Auto-syncs workouts from **Samsung Health → Health Connect → Devs Who Move** (`POST /api/activities`).
 
 ## Install
-1. Download `dwm-sync.apk` from **[Latest release](https://github.com/yogeshpaliyal/dwm-sync/releases/tag/latest)**. Every push to `main` rebuilds it. You can also open this folder in Android Studio and run it from there.
+1. Download `dwm-sync.apk` from **[Latest release](https://github.com/yogeshpaliyal/dwm-sync/releases/tag/latest)**. Every push to `main` rebuilds it as a release build shrunk with R8. You can also open this folder in Android Studio and run it from there.
 2. Install the APK on your phone. You'll need to allow installs from your browser or file manager. New builds install over the old one, because every build is signed with the same `debug.keystore` from this repo.
 
 ## First-run setup (shown once)
@@ -36,6 +36,7 @@ The app uses the Devs Who Move forest green (`#234D3C`) in both a light and a da
   - 401/403: the sync stops and asks for a new token.
   - Network errors, 429 and 5xx: retried later.
 - The token is stored in EncryptedSharedPreferences, and backups are disabled.
+- Release builds use R8 to shrink, optimise and obfuscate code, and drop unused resources, which also removes the unused extended Material icons. App-specific rules are in `app/proguard-rules.pro`. Each release includes `dwm-sync-mapping.txt` for turning crash traces back into readable ones. Debug builds aren't shrunk.
 
 ## Sport mapping
 | Health Connect | Devs Who Move |

@@ -12,12 +12,13 @@ android {
         applicationId = "com.yogeshpaliyal.dwmsync"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        // CI run number, so every published build upgrades the previous one.
+        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+        versionName = "1.0.$versionCode"
     }
 
-    // Shared debug key (standard "android" passwords) so CI builds install over each other.
-    // Not a secret: use a real key in a GitHub secret if you ever ship a release build.
+    // Shared test key (standard "android" passwords) so builds install over each other.
+    // Not a secret: switch to a real key from a GitHub secret before publishing to the Play Store.
     signingConfigs {
         getByName("debug") {
             storeFile = rootProject.file("debug.keystore")
@@ -32,8 +33,30 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         release {
-            isMinifyEnabled = false
+            // R8: shrink, optimise and obfuscate code, then drop unused resources.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("debug")
         }
+    }
+
+    packaging {
+        resources {
+            excludes += setOf(
+                "/META-INF/{AL2.0,LGPL2.1}",
+                "/META-INF/*.version",
+                "/META-INF/*.kotlin_module",
+                "DebugProbesKt.bin",
+                "kotlin-tooling-metadata.json",
+            )
+        }
+    }
+
+    dependenciesInfo {
+        // Drops the encrypted dependency block Google Play uses; not needed for direct APKs.
+        includeInApk = false
+        includeInBundle = false
     }
 
     compileOptions {
